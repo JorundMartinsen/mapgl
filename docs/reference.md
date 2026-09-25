@@ -38,6 +38,7 @@ For workflow-oriented setup guidance, see [Panel configuration](documentation.md
 - **Search by**: extra fields exposed to panel search.
 - **coordinates**: optional; used for Geo placement.
 - **MSSQL geometry (WKT)**: parses WKT returned by SQL Server `geometry.STAsText()`. Auto mode recognizes fields named `geometry` or `wkt`.
+- Open WKT polygon rings are closed automatically before they are passed to the map renderer.
 
 ## Dataframe model
 

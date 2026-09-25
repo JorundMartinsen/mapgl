@@ -18,4 +18,11 @@ describe('parseWkt', () => {
     expect(parseWkt('not geometry')).toBeUndefined();
     expect(parseWkt('POLYGON EMPTY')).toBeUndefined();
   });
+
+  it('closes an open MSSQL polygon ring before rendering', () => {
+    expect(parseWkt('POLYGON ((10 10, 10 20, 20 20, 20 10))')).toEqual({
+      type: 'Polygon',
+      coordinates: [[[10, 10], [10, 20], [20, 20], [20, 10], [10, 10]]],
+    });
+  });
 });

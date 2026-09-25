@@ -11,11 +11,31 @@ export function parseWkt(value: string): Geometry | undefined {
 
   try {
     const type = canonicalType(match[1]);
-    const coordinates = parseGroup(match[2].trim());
+    const coordinates = normalizeCoordinates(type, parseGroup(match[2].trim()));
     return { type, coordinates } as Geometry;
   } catch {
     return undefined;
   }
+}
+
+function normalizeCoordinates(type: Geometry['type'], coordinates: Coordinates): Coordinates {
+  if (type === 'Polygon') {
+    return (coordinates as Position[][]).map(closeRing);
+  }
+  if (type === 'MultiPolygon') {
+    return (coordinates as Position[][][]).map((polygon) => polygon.map(closeRing));
+  }
+  return coordinates;
+}
+
+function closeRing(ring: Position[]): Position[] {
+  if (ring.length === 0) {
+    return ring;
+  }
+  const first = ring[0];
+  const last = ring[ring.length - 1];
+  const isClosed = first.length === last.length && first.every((coordinate, index) => coordinate === last[index]);
+  return isClosed ? ring : [...ring, [...first]];
 }
 
 function canonicalType(type: string): Geometry['type'] {
