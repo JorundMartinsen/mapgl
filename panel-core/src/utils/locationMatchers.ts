@@ -18,6 +18,7 @@ const LOCATION_MODE = {
   Geohash: 'geohash',
   Coords: 'coords',
   Lookup: 'lookup',
+  Wkt: 'wkt',
 } as const;
 
 export interface FieldFinder {
@@ -70,7 +71,7 @@ const defaultMatchers: LocationFieldMatchers = {
   longitude: matchLowerNames(new Set(['longitude', 'lon', 'lng'])),
   latitude: matchLowerNames(new Set(['latitude', 'lat'])),
   h3: matchLowerNames(new Set(['h3'])),
-  wkt: matchLowerNames(new Set(['wkt'])),
+  wkt: matchLowerNames(new Set(['wkt', 'geometry'])),
   lookup: matchLowerNames(new Set(['lookup'])),
   geo: (frame: DataFrame) => frame.fields.find((field) => field.type === FieldType.geo),
 };
@@ -108,6 +109,11 @@ export async function getLocationMatchers(src?: ExtendFrameGeometrySource): Prom
     case LOCATION_MODE.Geojson:
       if (src?.geojson) {
         info.geojson = getFieldFinder(getFieldMatcher({ id: FieldMatcherID.byName, options: src.geojson }));
+      }
+      break;
+    case LOCATION_MODE.Wkt:
+      if (src?.wkt) {
+        info.wkt = getFieldFinder(getFieldMatcher({ id: FieldMatcherID.byName, options: src.wkt }));
       }
       break;
   }
@@ -157,6 +163,11 @@ export function getLocationFields(frame: DataFrame, location: LocationFieldMatch
       fields.mode = LOCATION_MODE.Geohash as ExtendFrameGeometrySourceMode;
       return fields;
     }
+    fields.wkt = location.wkt(frame);
+    if (fields.wkt) {
+      fields.mode = LOCATION_MODE.Wkt as ExtendFrameGeometrySourceMode;
+      return fields;
+    }
     fields.lookup = location.lookup(frame);
     if (fields.lookup) {
       fields.mode = LOCATION_MODE.Lookup as ExtendFrameGeometrySourceMode;
@@ -177,6 +188,9 @@ export function getLocationFields(frame: DataFrame, location: LocationFieldMatch
       break;
     case LOCATION_MODE.Lookup:
       fields.lookup = location.lookup(frame);
+      break;
+    case LOCATION_MODE.Wkt:
+      fields.wkt = location.wkt(frame);
       break;
   }
 

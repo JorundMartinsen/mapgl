@@ -5,6 +5,7 @@ import { ExtendFrameGeometrySourceMode } from '../extension';
 import { Gazetteer } from '../grafana_core/app/features/geo/gazetteer/gazetteer';
 import { decodeGeohash } from '../grafana_core/app/features/geo/format/geohash';
 import { getLocationFields, type LocationFieldMatchers } from './locationMatchers';
+import { parseWkt } from './wkt';
 
 export {
   getLocationFields,
@@ -19,7 +20,7 @@ export interface ExtendedField<T> extends Omit<Field<T>, 'values'> {
 }
 
 export interface FrameGeometryField {
-  field?: ExtendedField<Geometry>;
+  field?: ExtendedField<Geometry | undefined>;
   warning?: string;
   derived?: boolean;
   description?: string;
@@ -89,9 +90,30 @@ export function getGeometryField(frame: DataFrame, location: LocationFieldMatche
       return {
         warning: 'Select lookup field',
       };
+
+    case ExtendFrameGeometrySourceMode.Wkt:
+      if (fields.wkt) {
+        return {
+          field: geometryFieldFromWkt(fields.wkt),
+          derived: true,
+          description: `${fields.mode}: ${fields.wkt.name}`,
+        };
+      }
+      return {
+        warning: 'Select MSSQL geometry (WKT) field',
+      };
   }
 
   return { warning: 'unable to find geometry' };
+}
+
+function geometryFieldFromWkt(wkt: Field): ExtendedField<Geometry | undefined> {
+  return {
+    name: wkt.name ?? 'Geometry',
+    type: FieldType.geo,
+    values: wkt.values.map((value) => (typeof value === 'string' ? parseWkt(value) : undefined)),
+    config: hiddenTooltipField,
+  };
 }
 
 function pointFieldFromGeoJSON(geojson: Field<string>): ExtendedField<Geometry> {

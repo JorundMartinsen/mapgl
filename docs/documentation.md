@@ -91,6 +91,19 @@ These fields define how Mapgl builds the topology:
 
 Coordinates are not required for graph mode. They are only needed when you want Geo placement instead of auto-layout.
 
+### Microsoft SQL Server geometry
+
+For SQL Server `geometry` columns, return WKT from the query and choose **MSSQL geometry (WKT)** as the location mode. Point, line, polygon, and multi-geometries are supported.
+
+```sql
+SELECT
+  Id,
+  Shape.STAsText() AS geometry
+FROM dbo.Assets;
+```
+
+Use a consistent coordinate system for the map. For ordinary longitude/latitude data this is typically SRID 4326.
+
 ### Links and paths
 
 For a simple link, set **Vertex B** to the target node ID.
