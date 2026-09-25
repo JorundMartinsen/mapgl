@@ -98,11 +98,14 @@ For SQL Server `geometry` columns, return WKT from the query and choose **MSSQL 
 ```sql
 SELECT
   Id,
-  Shape.STAsText() AS geometry
+  Shape.STAsText() AS geometry,
+  Shape.STSrid AS srid
 FROM dbo.Assets;
 ```
 
-Use a consistent coordinate system for the map. For ordinary longitude/latitude data this is typically SRID 4326.
+Set **Source coordinate system** to the fixed SRID used by the query, or select the numeric **SRID field** when rows can use different supported systems. The SRID field overrides the fixed selection per row. Mapgl transforms supported projected coordinates to WGS 84 before rendering.
+
+Supported SRIDs are EPSG:4326, EPSG:25832 (UTM zone 32N), EPSG:25833 (UTM zone 33N), and EPSG:3857.
 
 ### Links and paths
 

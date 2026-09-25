@@ -6,6 +6,7 @@ import { Gazetteer } from '../grafana_core/app/features/geo/gazetteer/gazetteer'
 import { decodeGeohash } from '../grafana_core/app/features/geo/format/geohash';
 import { getLocationFields, type LocationFieldMatchers } from './locationMatchers';
 import { parseWkt } from './wkt';
+import { projectGeometry, type SupportedSrid } from './projection';
 
 export {
   getLocationFields,
@@ -94,7 +95,7 @@ export function getGeometryField(frame: DataFrame, location: LocationFieldMatche
     case ExtendFrameGeometrySourceMode.Wkt:
       if (fields.wkt) {
         return {
-          field: geometryFieldFromWkt(fields.wkt),
+          field: geometryFieldFromWkt(fields.wkt, fields.srid, location.sourceSrid),
           derived: true,
           description: `${fields.mode}: ${fields.wkt.name}`,
         };
@@ -107,11 +108,25 @@ export function getGeometryField(frame: DataFrame, location: LocationFieldMatche
   return { warning: 'unable to find geometry' };
 }
 
-function geometryFieldFromWkt(wkt: Field): ExtendedField<Geometry | undefined> {
+function geometryFieldFromWkt(
+  wkt: Field,
+  sridField: Field | undefined,
+  fallbackSrid: number
+): ExtendedField<Geometry | undefined> {
   return {
     name: wkt.name ?? 'Geometry',
     type: FieldType.geo,
-    values: wkt.values.map((value) => (typeof value === 'string' ? parseWkt(value) : undefined)),
+    values: wkt.values.map((value, index) => {
+      const geometry = typeof value === 'string' ? parseWkt(value) : undefined;
+      if (!geometry) {
+        return undefined;
+      }
+      const sridValue = sridField?.values[index];
+      const rowSrid =
+        sridValue === null || sridValue === undefined || sridValue === '' ? Number.NaN : Number(sridValue);
+      const srid = (Number.isFinite(rowSrid) ? rowSrid : fallbackSrid) as SupportedSrid;
+      return projectGeometry(geometry, srid);
+    }),
     config: hiddenTooltipField,
   };
 }
