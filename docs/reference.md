@@ -39,6 +39,7 @@ For workflow-oriented setup guidance, see [Panel configuration](documentation.md
 - **coordinates**: optional; used for Geo placement.
 - **MSSQL geometry (WKT)**: parses WKT returned by SQL Server `geometry.STAsText()`. Auto mode recognizes fields named `geometry` or `wkt`.
 - Open WKT polygon rings are closed automatically before they are passed to the map renderer.
+- WKT geometry supports a fixed source SRID or a numeric SRID query field. Supported source systems are EPSG:4326, EPSG:25832, EPSG:25833, and EPSG:3857; projected coordinates are converted to WGS 84 before rendering.
 
 ## Dataframe model
 

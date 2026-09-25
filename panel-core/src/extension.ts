@@ -31,6 +31,8 @@ export interface ExtendFrameGeometrySource {
   longitude?: string;
   h3?: string;
   wkt?: string;
+  sourceSrid?: number;
+  sridField?: string;
   lookup?: string;
   gazetteer?: string;
   geojson?: string;

@@ -59,6 +59,8 @@ export interface LocationFieldMatchers {
   latitude: FieldFinder;
   h3: FieldFinder;
   wkt: FieldFinder;
+  srid: FieldFinder;
+  sourceSrid: number;
   lookup: FieldFinder;
   geo: FieldFinder;
   gazetteer?: Gazetteer;
@@ -72,6 +74,8 @@ const defaultMatchers: LocationFieldMatchers = {
   latitude: matchLowerNames(new Set(['latitude', 'lat'])),
   h3: matchLowerNames(new Set(['h3'])),
   wkt: matchLowerNames(new Set(['wkt', 'geometry'])),
+  srid: matchLowerNames(new Set(['srid'])),
+  sourceSrid: 4326,
   lookup: matchLowerNames(new Set(['lookup'])),
   geo: (frame: DataFrame) => frame.fields.find((field) => field.type === FieldType.geo),
 };
@@ -80,6 +84,7 @@ export async function getLocationMatchers(src?: ExtendFrameGeometrySource): Prom
   const info: LocationFieldMatchers = {
     ...defaultMatchers,
     mode: src?.mode ?? (LOCATION_MODE.Auto as ExtendFrameGeometrySourceMode),
+    sourceSrid: src?.sourceSrid ?? 4326,
   };
   switch (info.mode) {
     case LOCATION_MODE.Geohash:
@@ -115,6 +120,9 @@ export async function getLocationMatchers(src?: ExtendFrameGeometrySource): Prom
       if (src?.wkt) {
         info.wkt = getFieldFinder(getFieldMatcher({ id: FieldMatcherID.byName, options: src.wkt }));
       }
+      if (src?.sridField) {
+        info.srid = getFieldFinder(getFieldMatcher({ id: FieldMatcherID.byName, options: src.sridField }));
+      }
       break;
   }
   return info;
@@ -128,6 +136,7 @@ export interface LocationFields {
   latitude?: Field;
   h3?: Field;
   wkt?: Field;
+  srid?: Field;
   lookup?: Field;
   geo?: Field<Geometry | undefined>;
   locName?: Field;
@@ -191,6 +200,7 @@ export function getLocationFields(frame: DataFrame, location: LocationFieldMatch
       break;
     case LOCATION_MODE.Wkt:
       fields.wkt = location.wkt(frame);
+      fields.srid = location.srid(frame);
       break;
   }
 

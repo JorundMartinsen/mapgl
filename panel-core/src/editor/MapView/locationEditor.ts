@@ -66,14 +66,39 @@ export function addLocationFields<TOptions>(
       break;
 
     case ExtendFrameGeometrySourceMode.Wkt:
-      builder.addFieldNamePicker({
-        path: `${prefix}wkt`,
-        name: 'MSSQL geometry field',
-        settings: {
-          filter: (f: Field) => f.type === FieldType.string,
-          noFieldsMessage: 'No WKT string fields found',
-        },
-      });
+      builder
+        .addFieldNamePicker({
+          path: `${prefix}wkt`,
+          name: 'MSSQL geometry field',
+          settings: {
+            filter: (f: Field) => f.type === FieldType.string,
+            noFieldsMessage: 'No WKT string fields found',
+          },
+        })
+        .addSelect({
+          path: `${prefix}sourceSrid`,
+          name: 'Source coordinate system',
+          description: 'Used when no SRID field is selected or its row is empty',
+          settings: {
+            options: [
+              { value: 4326, label: 'WGS 84 (EPSG:4326)' },
+              { value: 25832, label: 'ETRS89 / UTM zone 32N (EPSG:25832)' },
+              { value: 25833, label: 'ETRS89 / UTM zone 33N (EPSG:25833)' },
+              { value: 3857, label: 'Web Mercator (EPSG:3857)' },
+            ],
+          },
+          defaultValue: 4326,
+        })
+        .addFieldNamePicker({
+          path: `${prefix}sridField`,
+          name: 'SRID field (optional)',
+          description:
+            'A numeric query field such as geometry.STSrid; overrides the fixed source coordinate system per row',
+          settings: {
+            filter: (f: Field) => f.type === FieldType.number,
+            noFieldsMessage: 'No numeric SRID fields found',
+          },
+        });
       break;
 
     case ExtendFrameGeometrySourceMode.Lookup:
