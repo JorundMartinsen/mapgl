@@ -58,6 +58,12 @@ export const LocationModeEditor = ({
       description: t('geo.location-more-editor.mode-options.description-geohash', 'Specify geohash field'),
     },
     {
+      value: ExtendFrameGeometrySourceMode.Wkt,
+      label: 'MSSQL geometry (WKT)',
+      ariaLabel: 'MSSQL geometry (WKT)',
+      description: 'Specify a WKT field returned by geometry.STAsText()',
+    },
+    {
       value: ExtendFrameGeometrySourceMode.Lookup,
       label: t('geo.location-more-editor.mode-options.label-lookup', 'Lookup'),
       ariaLabel: selectors.components.Transforms.SpatialOperations.location.lookup.option,

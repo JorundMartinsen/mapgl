@@ -65,6 +65,17 @@ export function addLocationFields<TOptions>(
       });
       break;
 
+    case ExtendFrameGeometrySourceMode.Wkt:
+      builder.addFieldNamePicker({
+        path: `${prefix}wkt`,
+        name: 'MSSQL geometry field',
+        settings: {
+          filter: (f: Field) => f.type === FieldType.string,
+          noFieldsMessage: 'No WKT string fields found',
+        },
+      });
+      break;
+
     case ExtendFrameGeometrySourceMode.Lookup:
       builder
         .addFieldNamePicker({

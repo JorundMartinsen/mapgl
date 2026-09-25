@@ -21,6 +21,7 @@ export enum GeojsonFrameGeometrySourceMode {
   Geohash = 'geohash',
   Coords = 'coords',
   Lookup = 'lookup',
+  Wkt = 'wkt',
 }
 
 export interface ExtendFrameGeometrySource {

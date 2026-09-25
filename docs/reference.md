@@ -37,6 +37,7 @@ For workflow-oriented setup guidance, see [Panel configuration](documentation.md
 - **Namespace layers separator**: one- or two-symbol delimiter for nested namespace values. The preset values are `.`, `,`, and `-`; custom values are supported and `.` is selected by default.
 - **Search by**: extra fields exposed to panel search.
 - **coordinates**: optional; used for Geo placement.
+- **MSSQL geometry (WKT)**: parses WKT returned by SQL Server `geometry.STAsText()`. Auto mode recognizes fields named `geometry` or `wkt`.
 
 ## Dataframe model
 
